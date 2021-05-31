@@ -46,7 +46,7 @@ class _MyAppState extends State<MyApp> {
         padding: EdgeInsets.all(10.0),
         child: Column(
           children: <Widget>[
-            Icon(Icons.account_circle,size: 200,color: Colors.blue,),
+            Icon(Icons.account_circle,size: 200,color: Colors.blue),
 
             boxUi(),
           ],
@@ -75,7 +75,15 @@ class _MyAppState extends State<MyApp> {
       "pass":passctrl.text,
     };
     var res = await http.post(Uri.parse(url),body:data);
-    print(res.body);
+    var test=res.body.trim().substring(1,res.body.length-2).split(',');
+    var valeurs=[];
+    for (var i=0;i<test.length;i++){
+      var temp=test[i].split(":");
+      var pros=temp[1].trim().substring(1,temp[1].length-2);
+      print(pros);
+      valeurs.add(pros);
+    }
+
     if(res.body.isNotEmpty) {
       if (jsonDecode(res.body) == "dont have an account") {
         Fluttertoast.showToast(msg: "dont have an account,Create an account",
@@ -87,11 +95,11 @@ class _MyAppState extends State<MyApp> {
               msg: "incorrect password", toastLength: Toast.LENGTH_SHORT);
         }
         else {
-          print(jsonDecode(res.body));
+          //print(jsonDecode(res.body));
 
           Fluttertoast.showToast(
               msg: "Successfully logged in", toastLength: Toast.LENGTH_SHORT);
-          Navigator.push(context,MaterialPageRoute(builder: (context)=> SecondRoute()));
+          Navigator.push(context,MaterialPageRoute(builder: (context)=> SecondRoute(valeurs[1])));
         }
       }
     }else{
@@ -246,15 +254,19 @@ class _MyAppState extends State<MyApp> {
 }
 
 class SecondRoute extends StatelessWidget {
+  String id="";
+  SecondRoute(this.id);
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyHomePage(),
+      home: MyHomePage(this.id),
     );
   }
 }
 
 class MyHomePage extends StatelessWidget{
+  String id="";
+  MyHomePage(this.id);
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -265,7 +277,7 @@ class MyHomePage extends StatelessWidget{
       body: Center(
         child: BarcodeWidget(
           barcode: Barcode.code128(), // Barcode type and settings
-          data: '1', // Content
+          data: this.id, // Content
           width: 200,
           height: 200,
         ),
