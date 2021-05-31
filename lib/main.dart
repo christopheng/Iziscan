@@ -75,6 +75,7 @@ class _MyAppState extends State<MyApp> {
       "pass":passctrl.text,
     };
     var res = await http.post(Uri.parse(url),body:data);
+    print(res.body);
     if(res.body.isNotEmpty) {
       if (jsonDecode(res.body) == "dont have an account") {
         Fluttertoast.showToast(msg: "dont have an account,Create an account",
@@ -87,8 +88,9 @@ class _MyAppState extends State<MyApp> {
         }
         else {
           print(jsonDecode(res.body));
+
           Fluttertoast.showToast(
-              msg: "Successfully connected", toastLength: Toast.LENGTH_SHORT);
+              msg: "Successfully logged in", toastLength: Toast.LENGTH_SHORT);
           Navigator.push(context,MaterialPageRoute(builder: (context)=> SecondRoute()));
         }
       }
@@ -262,7 +264,7 @@ class MyHomePage extends StatelessWidget{
       ),
       body: Center(
         child: BarcodeWidget(
-          barcode: Barcode.aztec(), // Barcode type and settings
+          barcode: Barcode.code128(), // Barcode type and settings
           data: '1', // Content
           width: 200,
           height: 200,
