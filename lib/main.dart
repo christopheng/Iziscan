@@ -28,7 +28,7 @@ class _MyAppState extends State<MyApp> {
 
   bool signin = true;
 
-  late TextEditingController namectrl,emailctrl,passctrl;
+  late TextEditingController prenomctrl,nomctrl,emailctrl,passctrl;
 
   bool processing = false;
 
@@ -36,7 +36,8 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    namectrl = new TextEditingController();
+    prenomctrl=new TextEditingController();
+    nomctrl = new TextEditingController();
     emailctrl = new TextEditingController();
     passctrl = new TextEditingController();
   }
@@ -99,7 +100,9 @@ class _MyAppState extends State<MyApp> {
 
           Fluttertoast.showToast(
               msg: "Successfully logged in", toastLength: Toast.LENGTH_SHORT);
-          Navigator.push(context,MaterialPageRoute(builder: (context)=> SecondRoute(valeurs[1])));
+          //Navigator.push(context,MaterialPageRoute(builder: (context)=> SecondRoute(valeurs[0])));
+          //Navigator.push(context,MaterialPageRoute(builder: (context)=>MyStatefulWidget(valeurs[0])));
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) => MyStatefulWidget(id: valeurs[0],)));
         }
       }
     }else{
@@ -118,6 +121,8 @@ class _MyAppState extends State<MyApp> {
     });
     var url="http://localhost/Iziscan/signUp.php";
     var data={
+      "prenom":nomctrl.text,
+      "nom":nomctrl.text,
       "login":emailctrl.text,
       "pass":passctrl.text,
     };
@@ -220,14 +225,23 @@ class _MyAppState extends State<MyApp> {
   Widget signUpUi(){
     return Column(
       children: <Widget>[
+        TextField(
+          controller: prenomctrl,
+          decoration: InputDecoration(prefixIcon: Icon(Icons.account_box,),
+              hintText: 'Prénom'),
+        ),
 
+        TextField(
+          controller: nomctrl,
+          decoration: InputDecoration(prefixIcon: Icon(Icons.account_box,),
+              hintText: 'Nom'),
+        ),
 
         TextField(
           controller: emailctrl,
           decoration: InputDecoration(prefixIcon: Icon(Icons.account_box,),
               hintText: 'email'),
         ),
-
 
         TextField(
           controller: passctrl,
@@ -253,38 +267,83 @@ class _MyAppState extends State<MyApp> {
 
 }
 
-class SecondRoute extends StatelessWidget {
-  String id="";
-  SecondRoute(this.id);
+/// This is the stateful widget that the main application instantiates.
+class MyStatefulWidget extends StatefulWidget {
+  final String id;
+  MyStatefulWidget({Key? key, required this.id}) : super(key: key);
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: MyHomePage(this.id),
-    );
-  }
+  _MyStatefulWidgetState createState() => _MyStatefulWidgetState(id);
+
 }
 
-class MyHomePage extends StatelessWidget{
-  String id="";
-  MyHomePage(this.id);
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Menu principal"),
-      ),
-      body: Center(
-        child: BarcodeWidget(
+/// This is the private State class that goes with MyStatefulWidget.
+class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+  int _selectedIndex = 0;
+    String id="";
+    late List<Widget> _widgetOptions;
+    _MyStatefulWidgetState(this.id){
+      _widgetOptions = <Widget>[
+        BarcodeWidget(
           barcode: Barcode.code128(), // Barcode type and settings
-          data: this.id, // Content
+          data:id, // Content
           width: 200,
           height: 200,
         ),
+        Text(
+          'Tickets',
+          style: optionStyle,
+        ),
+        ListView(
+          children:<Widget>[
+            Container(
+              height:50,
+              color:Colors.amber,
+              child:const Center(child:Text("a"))
+            )
+          ],
+          scrollDirection: Axis.vertical,
+        )
+      ];
+    }
+
+  static const TextStyle optionStyle =
+  TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  @override
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+  @override
+  void initState(){
+    super.initState();
+
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Iziscan'),
+      ),
+      body: Center(
+        child: _widgetOptions.elementAt(_selectedIndex),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.qr_code),
+            label: 'Code barre',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.receipt),
+            label: 'Tickets',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: _onItemTapped,
       ),
     );
   }
-
-
-
 }
